@@ -1,9 +1,10 @@
-FROM node:14-alpine as builder
+FROM node:14 as builder
 
 WORKDIR /app
 
 # Instalar dependencias necesarias para compilar node-sass
-RUN apk add --no-cache python2 make g++ python3
+# Usamos una imagen de Node con Debian en lugar de Alpine para evitar problemas con Python
+# Debian ya incluye Python y las herramientas necesarias
 
 # Copiar primero los archivos de dependencias
 COPY package*.json ./
