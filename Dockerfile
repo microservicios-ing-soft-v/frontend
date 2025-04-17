@@ -1,34 +1,36 @@
-FROM node:14 as builder
+FROM node:12 as builder
 
 WORKDIR /app
 
-# Instalar dependencias necesarias para compilar node-sass
-# Usamos una imagen de Node con Debian en lugar de Alpine para evitar problemas con Python
-# Debian ya incluye Python y las herramientas necesarias
+# Configuración específica para node-sass
+ENV NODE_ENV=development
+ENV SASS_BINARY_NAME=linux-x64-64_binding.node
+ENV SASS_BINARY_SITE=https://github.com/sass/node-sass/releases/download/v4.7.2
 
-# Copiar primero los archivos de dependencias
+# Instalar herramientas necesarias
+RUN apt-get update && \
+    apt-get install -y python g++ build-essential && \
+    npm install -g node-gyp
+
+# Copiar package.json y package-lock.json
 COPY package*.json ./
 
-# Configurar sass para usar la versión binaria disponible o compilarse adecuadamente
-ENV SASS_BINARY_SITE=https://github.com/sass/node-sass/releases/download
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+# Instalar dependencias con retry
+RUN npm config set unsafe-perm true && \
+    npm install --force --no-optional
 
-# Instalar dependencias
-RUN npm install --unsafe-perm
-
-# Luego copiar el resto del código
+# Copiar el resto del código fuente
 COPY . .
 
 # Construir la aplicación
-RUN npm run build
+RUN npm run build || npm run build || npm run build
 
 # Segunda etapa - Nginx para servir el contenido estático
 FROM nginx:1.21-alpine
 
-# Copiar los archivos de la aplicación compilada
+# Copiar los archivos compilados desde la etapa de builder
+# Ajusta la ruta si tu proyecto Vue usa otra carpeta de salida
 COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Crear y copiar el archivo de configuración de Nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
