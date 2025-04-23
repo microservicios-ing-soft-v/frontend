@@ -68,6 +68,8 @@ jobs:
           password: ${{ env.VM_PASSWORD }}
           script: |
             set -eux
+            az login --identity
+            az acr login --name ${{ env.ACR_NAME }}
             cd /home/${{ env.VM_USER }}/${{ env.INFRA_REPO_FOLDER }}/docker-compose/prod
             export IMAGE_REGISTRY="${{ env.ACR_NAME }}.azurecr.io"
             export IMAGE_TAG="${{ github.sha }}"
