@@ -63,7 +63,10 @@ jobs:
             az containerapp update \
               --name ${{ env.SERVICE_NAME }} \
               --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-              --image ${{ env.ACR_LOGIN_SERVER }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+              --image ${{ env.ACR_LOGIN_SERVER }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
+              --set-env-vars AUTH_API_ADDRESS=http://api-gateway:8090/auth TODOS_API_ADDRESS=http://api-gateway:8090/todos ZIPKIN_URL=http://zipkin:9411/api/v2/spans \
+              --ingress external \
+              --target-port 8080
           else
             echo "Container App ${{ env.SERVICE_NAME }} does not exist, creating..."
             az containerapp create \
@@ -73,8 +76,12 @@ jobs:
               --image ${{ env.ACR_LOGIN_SERVER }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
               --registry-server ${{ env.ACR_LOGIN_SERVER }} \
               --registry-username ${{ env.AZURE_CLIENT_ID }} \
-              --registry-password ${{ env.AZURE_CLIENT_SECRET }}
+              --registry-password ${{ env.AZURE_CLIENT_SECRET }} \
+              --ingress external \
+              --target-port 8080 \
+              --set-env-vars AUTH_API_ADDRESS=http://api-gateway:8090/auth,TODOS_API_ADDRESS=http://api-gateway:8090/todos,ZIPKIN_URL=http://zipkin:9411/api/v2/spans
           fi
+
 
       - name: Azure Logout
         run: az logout
