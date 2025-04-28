@@ -29,15 +29,15 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/login': {
-        target: process.env.AUTH_API_ADDRESS || 'http://127.0.0.1:8081',
+        target: 'https://api-gateway.calmsmoke-842ccb2c.eastus.azurecontainerapps.io/auth',
         secure: false
       },
       '/todos': {
-        target: process.env.TODOS_API_ADDRESS || 'http://127.0.0.1:8082',
+        target: 'https://api-gateway.calmsmoke-842ccb2c.eastus.azurecontainerapps.io/todos',
         secure: false
       },
       '/zipkin': {
-        target: process.env.ZIPKIN_URL || 'http://127.0.0.1:9411/api/v2/spans',
+        target: 'https://zipkin.calmsmoke-842ccb2c.eastus.azurecontainerapps.io',
         pathRewrite: {
           '^/zipkin': ''
         },
