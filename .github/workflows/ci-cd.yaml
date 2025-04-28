@@ -58,30 +58,34 @@ jobs:
 
       - name: Create or Update Container App
         run: |
-          if az containerapp show --name ${{ env.SERVICE_NAME }} --resource-group ${{ env.RESOURCE_GROUP_NAME }} &>/dev/null; then
-            echo "Container App ${{ env.SERVICE_NAME }} exists, updating..."
+          if az containerapp show --name frontend --resource-group *** &>/dev/null; then
+            echo "Container App frontend exists, updating..."
             az containerapp update \
-              --name ${{ env.SERVICE_NAME }} \
-              --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-              --image ${{ env.ACR_LOGIN_SERVER }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
-              --set-env-vars AUTH_API_ADDRESS=http://api-gateway:8090/auth TODOS_API_ADDRESS=http://api-gateway:8090/todos ZIPKIN_URL=http://zipkin:9411/api/v2/spans \
-              --ingress external \
+              --name frontend \
+              --resource-group *** \
+              --image ***.azurecr.io/frontend:2e3181451e5329b55c361a8021dd4577b42ca89b \
+              --set-env-vars AUTH_API_ADDRESS=http://api-gateway:8090/auth,TODOS_API_ADDRESS=http://api-gateway:8090/todos,ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+          
+            # Ingress se actualiza aparte:
+            az containerapp ingress update \
+              --name frontend \
+              --resource-group *** \
+              --type external \
               --target-port 8080
           else
-            echo "Container App ${{ env.SERVICE_NAME }} does not exist, creating..."
+            echo "Container App frontend does not exist, creating..."
             az containerapp create \
-              --name ${{ env.SERVICE_NAME }} \
-              --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-              --environment ${{ env.CONTAINERAPPS_ENVIRONMENT }} \
-              --image ${{ env.ACR_LOGIN_SERVER }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
-              --registry-server ${{ env.ACR_LOGIN_SERVER }} \
-              --registry-username ${{ env.AZURE_CLIENT_ID }} \
-              --registry-password ${{ env.AZURE_CLIENT_SECRET }} \
+              --name frontend \
+              --resource-group *** \
+              --environment *** \
+              --image ***.azurecr.io/frontend:2e3181451e5329b55c361a8021dd4577b42ca89b \
+              --registry-server ***.azurecr.io \
+              --registry-username *** \
+              --registry-password *** \
               --ingress external \
               --target-port 8080 \
               --set-env-vars AUTH_API_ADDRESS=http://api-gateway:8090/auth,TODOS_API_ADDRESS=http://api-gateway:8090/todos,ZIPKIN_URL=http://zipkin:9411/api/v2/spans
           fi
-
 
       - name: Azure Logout
         run: az logout
